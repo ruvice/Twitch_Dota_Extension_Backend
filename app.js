@@ -60,7 +60,8 @@ function sendEventsToAll(newFact) {
 var d2gsi = require('dota2-gsi');
 var server = new d2gsi(
   {
-    port: process.env.PORT || 3000
+    port: process.env.PORT || 3000,
+    ip: null
   }
 );
 
