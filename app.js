@@ -10,12 +10,12 @@ app.use(bodyParser.urlencoded({extended: false}));
 
 app.get('/status', (request, response) => response.json({clients: clients.length}));
 
-const PORT = process.env.PORT;
+const PORT = 4000;
 
 let clients = [];
 let facts = [];
 
-app.listen(PORT, () => {
+app.listen(process.env.PORT || PORT, () => {
   console.log(`Facts Events service listening at https://twitch-dota-extension-backend.herokuapp.com/${PORT}`)
 })
 
@@ -60,7 +60,7 @@ function sendEventsToAll(newFact) {
 var d2gsi = require('dota2-gsi');
 var server = new d2gsi(
   {
-    port: PORT
+    port: process.env.PORT || 3000
   }
 );
 
