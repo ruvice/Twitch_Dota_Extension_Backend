@@ -14,7 +14,7 @@ const PORT = 3000;
 
 let clients = [];
 let gsiClients = [];
-let facts = [];
+let facts = 'Waiting for events';
 
 var eventEmitter    = require('events').EventEmitter;
 var events = new eventEmitter();
@@ -137,6 +137,7 @@ app.listen(process.env.PORT || PORT, () => {
 
 events.on('newclient', function(client) {
     console.log("New client connection, IP address: " + client.ip);
+    console.log(client)
     if (client.auth && client.auth.token) {
         console.log("Auth token: " + client.auth.token);
     } else {
@@ -166,7 +167,7 @@ function eventsHandler(request, response, next) {
   };
   response.writeHead(200, headers);
 
-  const data = `data: ${JSON.stringify(facts)}\n\n`;
+  const data = `data: ${facts}\n\n`;
 
   response.write(data);
 
