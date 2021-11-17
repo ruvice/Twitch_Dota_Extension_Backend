@@ -124,8 +124,8 @@ function Check_auth(tokens) {
 }
 
 function sendEventsToAll(newEvent, steamId) {
+    console.log(steamId)
   viewerClients.forEach(client => client.response.write(`data: ${JSON.stringify(newEvent)}`))
-  viewerClients.forEach(client => client.response.write(`steamId: ${steamId}`))
 }
 
 
