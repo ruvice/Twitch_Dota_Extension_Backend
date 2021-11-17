@@ -1,5 +1,6 @@
 // Potential problems: multiple streamers, might send data from all streamers to all viewers
 // Possible fix: tag viewer clients to unique streamerID, cycle through only that streamer when sending to all
+// MatchID might work better
 
 const express = require('express');
 const bodyParser = require('body-parser');
@@ -12,11 +13,11 @@ app.use(cors());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended: false}));
 
-app.get('/status', (request, response) => response.json({clients: clients.length}));
+app.get('/status', (request, response) => response.json({viewerClients: viewerClients.length}));
 
 const PORT = 3000;
 
-let clients = [];
+let viewerClients = [];
 let gsiClients = [];
 let voteHero = {}
 
@@ -122,8 +123,8 @@ function Check_auth(tokens) {
     }
 }
 
-function sendEventsToAll(newFact) {
-  clients.forEach(client => client.response.write(`data: ${JSON.stringify(newFact)}\n\n`))
+function sendEventsToAll(newEvent, steamId) {
+  viewerClients.forEach(client => client.response.write(`data: ${JSON.stringify(newEvent)}\n\nsteamId: ${steamId}`))
 }
 
 
@@ -141,15 +142,27 @@ app.listen(process.env.PORT || PORT, () => {
 
 events.on('newclient', function(client) {
     console.log("New client connection, IP address: " + client.ip);
-    const clientSteamId = client.gamestate.player.steamid
+    
     console.log(client)
-    console.log(clientSteamId)
+    let clientSteamId32 = 0
     if (client.auth && client.auth.token) {
         console.log("Auth token: " + client.auth.token);
     } else {
     console.log("No Auth token");
     }
 
+    // When player enters a game where steamid is accessible, start streamer log session
+    client.on('player:steamid', function(steamid){
+        const clientSteamId = BigInt(client.gamestate.player.steamid)
+        const clientSteamIdBin = (clientSteamId).toString(2)
+        const clientSteamIdBinLast32 = clientSteamIdBin.slice(-32)
+        const Y = BigInt(clientSteamIdBinLast32.slice(-1))
+        const V = BigInt(76561197960265728) // Default identifier https://developer.valvesoftware.com/wiki/SteamID
+        const Ztest = parseInt(clientSteamIdBinLast32.slice(0, 31), 2) // Account ID
+        clientSteamId32 = Ztest*2 + Number(Y) // Forumla from docs
+        console.log(`New session for: ${clientSteamId32}`)
+    })
+    
     client.on('player:activity', function(activity) {
         if (activity == 'playing') console.log("Game started!");
     });
@@ -158,30 +171,27 @@ events.on('newclient', function(client) {
         const eventInfo = {
             type: 'levelup',
             data: level,
-            string: `Now level ${level}`,
-            steamId: clientSteamId
+            string: `Now level ${level}`
         }
-        return sendEventsToAll(eventInfo);
+        return sendEventsToAll(eventInfo, clientSteamId32);
     });
     client.on('player:kill_list:victimid_#', function(kill_list) {
         if (kill_list) console.log(kill_list);
         const eventInfo = {
             type: 'kill',
             data: kill_list,
-            string: `Kill List ${kill_list}`,
-            steamId: clientSteamId
+            string: `Kill List ${kill_list}`
         }
-        return sendEventsToAll(eventInfo);
+        return sendEventsToAll(eventInfo, clientSteamId32);
     });
     client.on('hero:id', function(id){
         console.log("Picked " + id);
         const eventInfo = {
             type: 'pick',
             data: id,
-            string: `Picked ${id}`,
-            steamId: clientSteamId
+            string: `Picked ${id}`
         }
-        return sendEventsToAll(eventInfo);
+        return sendEventsToAll(eventInfo, clientSteamId32);
     })
 });
 
@@ -195,6 +205,7 @@ function eventsHandler(request, response, next) {
     'Cache-Control': 'no-cache'
   };
   response.writeHead(200, headers);
+  console.log(request)
 
   const data = `data: Waiting for event\n\n`;
 
@@ -207,15 +218,16 @@ function eventsHandler(request, response, next) {
     response
   };
 
-  clients.push(newClient);
+  viewerClients.push(newClient);
 
   request.on('close', () => {
     console.log(`${clientId} Connection closed`);
-    clients = clients.filter(client => client.id !== clientId);
+    viewerClients = viewerClients.filter(client => client.id !== clientId);
   });
 }
-console.log(clients);
+console.log(viewerClients);
 
+// Todo: Add streamerId here when connecting, chuck client under streamer's accountId
 app.get('/events', eventsHandler);
 
 async function addVote(request, respsonse, next) {
