@@ -124,7 +124,7 @@ function Check_auth(tokens) {
 }
 
 function sendEventsToAll(newEvent) {
-    viewerClients.forEach(client => client.response.write(`data: ${JSON.stringify(newEvent)}`))
+    viewerClients.forEach(client => client.response.write(`data: ${JSON.stringify(newEvent)}\n\n`))
 }
 
 
