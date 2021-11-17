@@ -118,7 +118,7 @@ function Check_auth(tokens) {
 }
 
 function sendEventsToAll(newFact) {
-  clients.forEach(client => client.response.write(`data: ${newFact}\n\n`))
+  clients.forEach(client => client.response.write(`data: ${JSON.stringify(newFact)}\n\n`))
 }
 
 
@@ -136,11 +136,13 @@ app.listen(process.env.PORT || PORT, () => {
 
 events.on('newclient', function(client) {
     console.log("New client connection, IP address: " + client.ip);
+    const clientSteamId = client.gamestate.player.steamid
     console.log(client)
+    console.log(clientSteamId)
     if (client.auth && client.auth.token) {
         console.log("Auth token: " + client.auth.token);
     } else {
-        console.log("No Auth token");
+    console.log("No Auth token");
     }
 
     client.on('player:activity', function(activity) {
@@ -148,11 +150,34 @@ events.on('newclient', function(client) {
     });
     client.on('hero:level', function(level) {
         console.log("Now level " + level);
-        return sendEventsToAll(`Now level ${level}`);
+        const eventInfo = {
+            type: 'levelup',
+            data: level,
+            string: `Now level ${level}`,
+            steamId: clientSteamId
+        }
+        return sendEventsToAll(eventInfo);
     });
-    client.on('abilities:ability0:can_cast', function(can_cast) {
-        if (can_cast) console.log("Ability0 off cooldown!");
+    client.on('player:kill_list:victimid_#', function(kill_list) {
+        if (kill_list) console.log(kill_list);
+        const eventInfo = {
+            type: 'kill',
+            data: kill_list,
+            string: `Kill List ${kill_list}`,
+            steamId: clientSteamId
+        }
+        return sendEventsToAll(eventInfo);
     });
+    client.on('hero:id', function(id){
+        console.log("Picked " + id);
+        const eventInfo = {
+            type: 'pick',
+            data: id,
+            string: `Picked ${id}`,
+            steamId: clientSteamId
+        }
+        return sendEventsToAll(eventInfo);
+    })
 });
 
 
