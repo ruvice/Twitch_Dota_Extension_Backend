@@ -1,6 +1,10 @@
+// Potential problems: multiple streamers, might send data from all streamers to all viewers
+// Possible fix: tag viewer clients to unique streamerID, cycle through only that streamer when sending to all
+
 const express = require('express');
 const bodyParser = require('body-parser');
 const cors = require('cors');
+const { INIT_VOTE_HERO } = require('./helper')
 
 const app = express();
 
@@ -14,6 +18,7 @@ const PORT = 3000;
 
 let clients = [];
 let gsiClients = [];
+let voteHero = {}
 
 var eventEmitter    = require('events').EventEmitter;
 var events = new eventEmitter();
@@ -209,6 +214,34 @@ function eventsHandler(request, response, next) {
     clients = clients.filter(client => client.id !== clientId);
   });
 }
-console.log(clients)
+console.log(clients);
 
 app.get('/events', eventsHandler);
+
+async function addVote(request, respsonse, next) {
+    /*
+    exampleBody = {
+        heroId: 43
+    }
+    */
+    const newVote = request.body;
+    voteHero[newVote.streamerId][newVote.heroId] += 1;
+    respsonse.json(voteHero[newVote.streamerId]);
+    return sendEventsToAll(voteHero[newVote.streamerId]);
+}
+
+async function initVote(request, respsonse, next) {
+    /*
+    exampleBody = {
+        heroId: 43
+    }
+    */
+    const streamerId = request.body;
+    voteHero[streamerId] = INIT_VOTE_HERO;
+    respsonse.json(voteHero[streamerId]);
+    return sendEventsToAll(voteHero[streamerId]);
+}
+
+app.post('/viewer-vote-hero', addVote);
+
+app.post('/init-vote-hero', initVote);
