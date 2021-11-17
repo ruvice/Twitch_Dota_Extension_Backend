@@ -174,7 +174,7 @@ events.on('newclient', function(client) {
             data: level,
             string: `Now level ${level}`
         }
-        return sendEventsToAll(eventInfo, streamerId);
+        return sendEventsToAll(eventInfo, clientSteamId32);
     });
     client.on('player:kill_list:victimid_#', function(kill_list) {
         if (kill_list) console.log(kill_list);
@@ -183,7 +183,7 @@ events.on('newclient', function(client) {
             data: kill_list,
             string: `Kill List ${kill_list}`
         }
-        return sendEventsToAll(eventInfo, streamerId);
+        return sendEventsToAll(eventInfo, clientSteamId32);
     });
     client.on('hero:id', function(id){
         console.log("Picked " + id);
@@ -192,7 +192,7 @@ events.on('newclient', function(client) {
             data: id,
             string: `Picked ${id}`
         }
-        return sendEventsToAll(eventInfo, streamerId);
+        return sendEventsToAll(eventInfo, clientSteamId32);
     })
 });
 
