@@ -124,7 +124,7 @@ function Check_auth(tokens) {
 }
 
 function sendEventsToAll(newEvent, steamId) {
-  viewerClients.forEach(client => client.response.write(`data: ${JSON.stringify(newEvent)}\n\nsteamId: ${steamId}`))
+  viewerClients.forEach(client => client.response.write(`data: ${JSON.stringify(newEvent)},\n\nsteamId: ${steamId}`))
 }
 
 
@@ -230,6 +230,7 @@ console.log(viewerClients);
 // Todo: Add streamerId here when connecting, chuck client under streamer's accountId
 app.get('/events', eventsHandler);
 
+// Todo: function for votes, sendToAll doesnt work
 async function addVote(request, respsonse, next) {
     /*
     exampleBody = {
