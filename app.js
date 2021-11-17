@@ -119,7 +119,7 @@ function Check_auth(tokens) {
 }
 
 function sendEventsToAll(newFact) {
-  clients.forEach(client => client.response.write(`data: ${JSON.stringify(newFact)}\n\n`))
+  clients.forEach(client => client.response.write(`data: ${newFact}\n\n`))
 }
 
 
