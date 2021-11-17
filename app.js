@@ -123,9 +123,8 @@ function Check_auth(tokens) {
     }
 }
 
-function sendEventsToAll(newEvent, steamId) {
-    console.log(steamId)
-  viewerClients.forEach(client => client.response.write(`data: ${JSON.stringify(newEvent)}`))
+function sendEventsToAll(newEvent) {
+    viewerClients.forEach(client => client.response.write(`data: ${JSON.stringify(newEvent)}`))
 }
 
 
@@ -174,7 +173,7 @@ events.on('newclient', function(client) {
             data: level,
             string: `Now level ${level}`
         }
-        return sendEventsToAll(eventInfo, clientSteamId32);
+        return sendEventsToAll(eventInfo);
     });
     client.on('player:kill_list:victimid_#', function(kill_list) {
         if (kill_list) console.log(kill_list);
@@ -183,7 +182,7 @@ events.on('newclient', function(client) {
             data: kill_list,
             string: `Kill List ${kill_list}`
         }
-        return sendEventsToAll(eventInfo, clientSteamId32);
+        return sendEventsToAll(eventInfo);
     });
     client.on('hero:id', function(id){
         console.log("Picked " + id);
@@ -192,7 +191,7 @@ events.on('newclient', function(client) {
             data: id,
             string: `Picked ${id}`
         }
-        return sendEventsToAll(eventInfo, clientSteamId32);
+        return sendEventsToAll(eventInfo);
     })
 });
 
