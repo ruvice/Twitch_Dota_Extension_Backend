@@ -14,7 +14,6 @@ const PORT = 3000;
 
 let clients = [];
 let gsiClients = [];
-let facts = 'Waiting for events';
 
 var eventEmitter    = require('events').EventEmitter;
 var events = new eventEmitter();
@@ -167,7 +166,7 @@ function eventsHandler(request, response, next) {
   };
   response.writeHead(200, headers);
 
-  const data = `data: ${facts}\n\n`;
+  const data = `data: Waiting for event\n\n`;
 
   response.write(data);
 
