@@ -188,11 +188,14 @@ events.on('newclient', function(client) {
         const clientSteamId32 = getSteamId32(BigInt(client.gamestate.player.steamid))
         return sendEventsToAll(eventInfo, clientSteamId32);
     });
-    client.on('player:kill_list:victimid_#', function(kill_list) {
-        if (kill_list) console.log(kill_list);
+    client.on('player:kills', function(kills) {
+        console.log(`Kills: ${kills}`)
         const eventInfo = {
             type: 'kill',
-            data: kill_list,
+            data: {
+                kill_list: client.gamestate.kill_list,
+                kills: kills,
+            },
         }
         const clientSteamId32 = getSteamId32(BigInt(client.gamestate.player.steamid))
         return sendEventsToAll(eventInfo, clientSteamId32);
