@@ -125,7 +125,7 @@ function Check_auth(tokens) {
 }
 
 function sendEventsToAll(newEvent, streamerId) {
-    viewerClients[streamerId]?.forEach(client => client.response.write(`data: ${JSON.stringify(newEvent)}\n\n`))
+    viewerClients.streamerId?.forEach(client => client.response.write(`data: ${JSON.stringify(newEvent)}\n\n`))
     // viewerClients.forEach(client => client.response.write(`data: ${JSON.stringify(newEvent)}\n\n`))
 }
 
@@ -221,16 +221,16 @@ function eventsHandler(request, response, next) {
         response
     };
 
-    if (viewerClients[streamerId]){
-    viewerClients[streamerId].push(newClient);
+    if (viewerClients.streamerId){
+    viewerClients.streamerId.push(newClient);
     } else {
-        viewerClients[streamerId] = [newClient];
+        viewerClients.streamerId = [newClient];
     }
 
     console.log(viewerClients);
     request.on('close', () => {
     console.log(`${clientId} Connection closed`);
-    viewerClients = viewerClients[streamerId].filter(client => client.id !== clientId);
+    viewerClients = viewerClients.streamerId.filter(client => client.id !== clientId);
     });
 }
 
