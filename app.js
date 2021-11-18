@@ -219,6 +219,7 @@ function eventsHandler(request, response, next) {
   };
 
   viewerClients[streamerId].push(newClient);
+  console.log(viewerClients)
 
   request.on('close', () => {
     console.log(`${clientId} Connection closed`);
@@ -228,7 +229,7 @@ function eventsHandler(request, response, next) {
 console.log(viewerClients);
 
 // Todo: Add streamerId here when connecting, chuck client under streamer's accountId
-app.get('/events/:streamerId', eventsHandler);
+app.get('/events/:streamerId', eventsHandler(req, res));
 
 // Todo: function for votes, sendToAll doesnt work
 async function addVote(request, respsonse, next) {
