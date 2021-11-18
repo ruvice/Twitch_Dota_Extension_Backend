@@ -125,6 +125,7 @@ function Check_auth(tokens) {
 }
 
 function sendEventsToAll(newEvent, streamerId) {
+    console.log(streamerId)
     viewerClients[streamerId]?.forEach(client => client.response.write(`data: ${JSON.stringify(newEvent)}\n\n`))
     // viewerClients.forEach(client => client.response.write(`data: ${JSON.stringify(newEvent)}\n\n`))
 }
