@@ -145,7 +145,7 @@ app.listen(process.env.PORT || PORT, () => {
 
 events.on('newclient', function(client) {
     console.log("New client connection, IP address: " + client.ip);
-    let clientSteamId32 = 0
+    // let clientSteamId32 = 0
     if (client.auth && client.auth.token) {
         console.log("Auth token: " + client.auth.token);
     } else {
@@ -153,16 +153,16 @@ events.on('newclient', function(client) {
     }
 
     // When player enters a game where steamid is accessible, start streamer log session
-    client.on('player:steamid', function(steamid){
+    if (client.gamestate.player.steamid){
         const clientSteamId = BigInt(client.gamestate.player.steamid)
         const clientSteamIdBin = (clientSteamId).toString(2)
         const clientSteamIdBinLast32 = clientSteamIdBin.slice(-32)
         const Y = BigInt(clientSteamIdBinLast32.slice(-1))
         const V = BigInt(76561197960265728) // Default identifier https://developer.valvesoftware.com/wiki/SteamID
         const Ztest = parseInt(clientSteamIdBinLast32.slice(0, 31), 2) // Account ID
-        clientSteamId32 = Ztest*2 + Number(Y) // Forumla from docs
+        const clientSteamId32 = Ztest*2 + Number(Y) // Forumla from docs
         console.log(`New session for: ${clientSteamId32}`)
-    })
+    }
     
     client.on('player:activity', function(activity) {
         if (activity == 'playing') console.log("Game started!");
