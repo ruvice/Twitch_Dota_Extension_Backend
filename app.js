@@ -13,7 +13,7 @@ app.use(cors());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended: false}));
 
-app.get('/status', (request, response) => response.json({viewerClients}));
+app.get('/status', (request, response) => response.json({viewerClients: viewerClients}));
 
 const PORT = 3000;
 
@@ -125,7 +125,7 @@ function Check_auth(tokens) {
 }
 
 function sendEventsToAll(newEvent, streamerId) {
-    viewerClients[streamerId].forEach(client => client.response.write(`data: ${JSON.stringify(newEvent)}\n\n`))
+    viewerClients[streamerId]?.forEach(client => client.response.write(`data: ${JSON.stringify(newEvent)}\n\n`))
     // viewerClients.forEach(client => client.response.write(`data: ${JSON.stringify(newEvent)}\n\n`))
 }
 
