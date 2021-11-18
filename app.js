@@ -13,7 +13,7 @@ app.use(cors());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended: false}));
 
-app.get('/status', (request, response) => response.json({viewerClients: viewerClients}));
+app.get('/status', (request, response) => response.write(viewerClients));
 
 const PORT = 3000;
 
