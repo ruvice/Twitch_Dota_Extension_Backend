@@ -219,7 +219,11 @@ function eventsHandler(request, response, next) {
     response
   };
 
-  viewerClients[streamerId].push(newClient);
+  if (viewerClients[streamerId]){
+    viewerClients[streamerId].push(newClient);
+  } else {
+      viewerClients[streamerId] = [newClient];
+  }
     // viewerClients.push(newClient);
 
   request.on('close', () => {
