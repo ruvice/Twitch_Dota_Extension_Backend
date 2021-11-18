@@ -160,7 +160,6 @@ events.on('newclient', function(client) {
     } else {
     console.log("No Auth token");
     }
-    console.log(client);
     
     client.on('player:activity', function(activity) {
         console.log(`Activity: ${activity}`)
