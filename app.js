@@ -13,7 +13,7 @@ app.use(cors());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended: false}));
 
-app.get('/status', (request, response) => response.write(JSON.stringify(viewerClients)));
+// app.get('/status', (request, response) => response.write(JSON.stringify(viewerClients)));
 
 const PORT = 3000;
 
@@ -199,39 +199,40 @@ events.on('newclient', function(client) {
 // ...
 
 function eventsHandler(request, response, next) {
-  const headers = {
+    const headers = {
     'Content-Type': 'text/event-stream',
     'Connection': 'keep-alive',
     'Cache-Control': 'no-cache'
-  };
-  response.writeHead(200, headers);
-  const streamerId = request.params.streamerId
-  console.log(streamerId)
+    };
+    response.writeHead(200, headers);
+    const streamerId = request.params.streamerId
+    console.log(streamerId)
 
-  const data = `data: Waiting for event\n\n`;
+    const data = `data: Waiting for event\n\n`;
 
-  response.write(data);
+    response.write(data);
 
-  const clientId = Date.now();
+    //   const clientId = Date.now();
+    console.log(request.connection.remoteAddress)
+    const clientId = request.ip
 
-  const newClient = {
-    id: clientId,
-    response
-  };
+    const newClient = {
+        id: clientId,
+        response
+    };
 
-  if (viewerClients[streamerId]){
+    if (viewerClients[streamerId]){
     viewerClients[streamerId].push(newClient);
-  } else {
-      viewerClients[streamerId] = [newClient];
-  }
-    // viewerClients.push(newClient);
+    } else {
+        viewerClients[streamerId] = [newClient];
+    }
 
-  request.on('close', () => {
+    console.log(viewerClients);
+    request.on('close', () => {
     console.log(`${clientId} Connection closed`);
     viewerClients = viewerClients[streamerId].filter(client => client.id !== clientId);
-  });
+    });
 }
-console.log(viewerClients);
 
 // Todo: Add streamerId here when connecting, chuck client under streamer's accountId
 app.get('/events/:streamerId', eventsHandler);
