@@ -18,6 +18,7 @@ app.get('/status', (request, response) => response.json({viewerClients}));
 const PORT = 3000;
 
 let viewerClients = {};
+// let viewerClients = [];
 let gsiClients = [];
 let voteHero = {}
 
@@ -125,6 +126,7 @@ function Check_auth(tokens) {
 
 function sendEventsToAll(newEvent, streamerId) {
     viewerClients[streamerId].forEach(client => client.response.write(`data: ${JSON.stringify(newEvent)}\n\n`))
+    // viewerClients.forEach(client => client.response.write(`data: ${JSON.stringify(newEvent)}\n\n`))
 }
 
 
@@ -142,8 +144,6 @@ app.listen(process.env.PORT || PORT, () => {
 
 events.on('newclient', function(client) {
     console.log("New client connection, IP address: " + client.ip);
-    
-    console.log(client)
     let clientSteamId32 = 0
     if (client.auth && client.auth.token) {
         console.log("Auth token: " + client.auth.token);
@@ -206,6 +206,7 @@ function eventsHandler(request, response, next) {
   };
   response.writeHead(200, headers);
   const streamerId = request.params.streamerId
+  console.log(streamerId)
 
   const data = `data: Waiting for event\n\n`;
 
@@ -219,17 +220,17 @@ function eventsHandler(request, response, next) {
   };
 
   viewerClients[streamerId].push(newClient);
-  console.log(viewerClients)
+    // viewerClients.push(newClient);
 
   request.on('close', () => {
     console.log(`${clientId} Connection closed`);
-    viewerClients = viewerClients.filter(client => client.id !== clientId);
+    viewerClients = viewerClients[streamerId].filter(client => client.id !== clientId);
   });
 }
 console.log(viewerClients);
 
 // Todo: Add streamerId here when connecting, chuck client under streamer's accountId
-app.get('/events/:streamerId', eventsHandler(req, res));
+app.get('/events/:streamerId', eventsHandler);
 
 // Todo: function for votes, sendToAll doesnt work
 async function addVote(request, respsonse, next) {
