@@ -13,11 +13,11 @@ app.use(cors());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended: false}));
 
-app.get('/status', (request, response) => response.json({viewerClients: viewerClients.length}));
+app.get('/status', (request, response) => response.json({viewerClients}));
 
 const PORT = 3000;
 
-let viewerClients = [];
+let viewerClients = {};
 let gsiClients = [];
 let voteHero = {}
 
@@ -124,8 +124,7 @@ function Check_auth(tokens) {
 }
 
 function sendEventsToAll(newEvent, streamerId) {
-    console.log(streamerId)
-    viewerClients.forEach(client => client.response.write(`data: ${JSON.stringify(newEvent)}\n\n`))
+    viewerClients[streamerId].forEach(client => client.response.write(`data: ${JSON.stringify(newEvent)}\n\n`))
 }
 
 
@@ -206,7 +205,7 @@ function eventsHandler(request, response, next) {
     'Cache-Control': 'no-cache'
   };
   response.writeHead(200, headers);
-  console.log(request)
+  const streamerId = request.params.streamerId
 
   const data = `data: Waiting for event\n\n`;
 
@@ -219,7 +218,7 @@ function eventsHandler(request, response, next) {
     response
   };
 
-  viewerClients.push(newClient);
+  viewerClients[streamerId].push(newClient);
 
   request.on('close', () => {
     console.log(`${clientId} Connection closed`);
@@ -229,7 +228,7 @@ function eventsHandler(request, response, next) {
 console.log(viewerClients);
 
 // Todo: Add streamerId here when connecting, chuck client under streamer's accountId
-app.get('/events', eventsHandler);
+app.get('/events/:streamerId', eventsHandler);
 
 // Todo: function for votes, sendToAll doesnt work
 async function addVote(request, respsonse, next) {
