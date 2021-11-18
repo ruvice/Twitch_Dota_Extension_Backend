@@ -190,10 +190,11 @@ events.on('newclient', function(client) {
     });
     client.on('player:kills', function(kills) {
         console.log(`Kills: ${kills}`)
+        console.log(`Kill List: ${client.gamestate.player.kill_list}`)
         const eventInfo = {
             type: 'kill',
             data: {
-                kill_list: client.gamestate.kill_list,
+                killList: client.gamestate.player.kill_list,
                 kills: kills,
             },
         }
