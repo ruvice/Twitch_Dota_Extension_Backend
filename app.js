@@ -160,16 +160,31 @@ events.on('newclient', function(client) {
     } else {
     console.log("No Auth token");
     }
+    console.log(client);
     
     client.on('player:activity', function(activity) {
-        if (activity == 'playing') console.log("Game started!");
+        console.log(`Activity: ${activity}`)
+    });
+
+    client.on('map:win_team', function(win_team) {
+        console.log(`Win Team: ${win_team}`)
+        console.log(`On Team: ${client.gamestate.player.team_name}`)
+        let isVictory = false
+        if (win_team ==  client.gamestate.player.team_name) {
+            isVictory = true
+        }
+        const eventInfo = {
+            type: 'outcome',
+            data: isVictory,
+        }
+        const clientSteamId32 = getSteamId32(BigInt(client.gamestate.player.steamid))
+        return sendEventsToAll(eventInfo, clientSteamId32);
     });
     client.on('hero:level', function(level) {
         console.log("Now level " + level);
         const eventInfo = {
             type: 'levelup',
             data: level,
-            string: `Now level ${level}`
         }
         const clientSteamId32 = getSteamId32(BigInt(client.gamestate.player.steamid))
         return sendEventsToAll(eventInfo, clientSteamId32);
@@ -179,8 +194,8 @@ events.on('newclient', function(client) {
         const eventInfo = {
             type: 'kill',
             data: kill_list,
-            string: `Kill List ${kill_list}`
         }
+        const clientSteamId32 = getSteamId32(BigInt(client.gamestate.player.steamid))
         return sendEventsToAll(eventInfo, clientSteamId32);
     });
     client.on('hero:id', function(id){
@@ -188,8 +203,8 @@ events.on('newclient', function(client) {
         const eventInfo = {
             type: 'pick',
             data: id,
-            string: `Picked ${id}`
         }
+        const clientSteamId32 = getSteamId32(BigInt(client.gamestate.player.steamid))
         return sendEventsToAll(eventInfo, clientSteamId32);
     })
 });
