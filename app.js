@@ -230,7 +230,7 @@ function eventsHandler(request, response, next) {
     console.log(viewerClients);
     request.on('close', () => {
     console.log(`${clientId} Connection closed`);
-    viewerClients = viewerClients[streamerId]?.filter(client => client.id !== clientId);
+    viewerClients[streamerId] = viewerClients[streamerId]?.filter(client => client.id !== clientId);
     });
 }
 
