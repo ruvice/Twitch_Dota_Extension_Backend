@@ -263,7 +263,7 @@ async function addVote(request, respsonse, next) {
         type: 'voteHero',
         data: voteHero[newVote[streamerId]]
     }
-    return sendEventsToAll(voteEventInfo, streamerId);
+    return sendEventsToAll(voteEventInfo, newVote[streamerId]);
 }
 
 async function initVote(request, respsonse, next) {
