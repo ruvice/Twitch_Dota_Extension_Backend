@@ -303,8 +303,14 @@ async function stopVote(request, respsonse, next) {
 }
 
 function getVote(request, response, next){
+    const headers = {
+        'Content-Type': 'text/event-stream',
+        'Connection': 'keep-alive',
+        'Cache-Control': 'no-cache'
+    };
+    response.writeHead(200, headers);
     const streamerId = request.params.streamerId
-    const data = `data: voteHero[streamerId]`
+    const data = `data: ${JSON.stringify(voteHero[streamerId])}`
     response.write(data);
 }
 app.post('/vote/hero', addVote)
