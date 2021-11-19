@@ -304,7 +304,7 @@ async function stopVote(request, respsonse, next) {
 
 function getVote(request, response, next){
     const streamerId = request.params.streamerId
-    const data = voteHero[streamerId]
+    const data = `data: voteHero[streamerId]`
     response.write(data);
 }
 app.post('/vote/hero', addVote)
