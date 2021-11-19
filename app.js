@@ -276,6 +276,10 @@ async function initVote(request, respsonse, next) {
     console.log(newVote)
     const streamerId = newVote.streamerId
     voteHero[streamerId] = INIT_VOTE_HERO;
+    // Hard reset
+    Object.keys(voteHero[streamerId]).forEach((key) => {
+        voteHero[streamerId][key] = 0
+    })
     respsonse.json(voteHero[streamerId]);
     const voteEventInfo = {
         type: 'voteHero',
