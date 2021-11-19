@@ -257,14 +257,13 @@ async function addVote(request, respsonse, next) {
     }
     */
     const newVote = request.body;
-    console.log(newVote)
-    voteHero[newVote[streamerId]][newVote.heroId] += 1;
-    respsonse.json(voteHero[newVote[streamerId]]);
+    voteHero[newVote.streamerId][newVote.heroId] += 1;
+    respsonse.json(voteHero[newVote.streamerId]);
     const voteEventInfo = {
         type: 'voteHero',
-        data: voteHero[newVote[streamerId]]
+        data: voteHero[newVote.streamerId]
     }
-    return sendEventsToAll(voteEventInfo, newVote[streamerId]);
+    return sendEventsToAll(voteEventInfo, newVote.streamerId);
 }
 
 async function initVote(request, respsonse, next) {
@@ -303,7 +302,12 @@ async function stopVote(request, respsonse, next) {
     return sendEventsToAll(voteEventInfo, streamerId);
 }
 
-
+function getVote(request, response, next){
+    const streamerId = request.params.streamerId
+    const data = voteHero[streamerId]
+    response.write(data);
+}
 app.post('/vote/hero', addVote)
 app.post('/initvote/hero', initVote)
 app.post('/stopvote/hero', stopVote)
+app.get('/votes/:streamerId', getVote)
