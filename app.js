@@ -257,6 +257,7 @@ async function addVote(request, respsonse, next) {
     }
     */
     const newVote = request.body;
+    console.log(newVote)
     voteHero[newVote[streamerId]][newVote.heroId] += 1;
     respsonse.json(voteHero[newVote[streamerId]]);
     const voteEventInfo = {
