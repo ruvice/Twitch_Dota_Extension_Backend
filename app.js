@@ -310,7 +310,7 @@ function getVote(request, response, next){
     };
     response.writeHead(200, headers);
     const streamerId = request.params.streamerId
-    const data = `{data: ${JSON.stringify(voteHero[streamerId])}}`
+    const data = `${JSON.stringify(voteHero[streamerId])}`
     response.write(data);
     response.end()
 }
