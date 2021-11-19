@@ -272,7 +272,9 @@ async function initVote(request, respsonse, next) {
         streamerId: 12345
     }
     */
-    const { streamerId } = request.body;
+    const newVote = request.body;
+    console.log(newVote)
+    const streamerId = newVote.streamerId
     voteHero[streamerId] = INIT_VOTE_HERO;
     respsonse.json(voteHero[streamerId]);
     const voteEventInfo = {
@@ -283,5 +285,24 @@ async function initVote(request, respsonse, next) {
     return sendEventsToAll(voteEventInfo, streamerId);
 }
 
+async function stopVote(request, respsonse, next) {
+    /*
+    exampleBody = {
+        streamerId: 12345
+    }
+    */
+    const { streamerId } = request.body;
+    delete voteHero[streamerId];
+    respsonse.json(null);
+    const voteEventInfo = {
+        type: 'voteHero',
+        data: null
+    }
+    console.log(voteHero)
+    return sendEventsToAll(voteEventInfo, streamerId);
+}
+
+
 app.post('/vote/hero', addVote)
 app.post('/initvote/hero', initVote)
+app.post('/stopvote/hero', stopVote)
