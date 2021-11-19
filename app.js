@@ -13,12 +13,9 @@ app.use(cors());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended: false}));
 
-// app.get('/status', (request, response) => response.write(JSON.stringify(viewerClients)));
-
 const PORT = 3000;
 
 let viewerClients = {};
-// let viewerClients = [];
 let gsiClients = [];
 let voteHero = {}
 
@@ -190,7 +187,7 @@ events.on('newclient', function(client) {
     });
     client.on('player:kills', function(kills) {
         console.log(`Kills: ${kills}`)
-        console.log(`Kill List: ${client.gamestate.player.kill_list}`)
+        console.log(client.gamestate.player.kill_list)
         const eventInfo = {
             type: 'kill',
             data: {
@@ -229,8 +226,6 @@ function eventsHandler(request, response, next) {
 
     response.write(data);
 
-    //   const clientId = Date.now();
-    console.log(request.connection.remoteAddress)
     const clientId = request.ip
 
     const newClient = {
@@ -244,41 +239,49 @@ function eventsHandler(request, response, next) {
         viewerClients[streamerId] = [newClient];
     }
 
-    console.log(viewerClients);
     request.on('close', () => {
     console.log(`${clientId} Connection closed`);
     viewerClients[streamerId] = viewerClients[streamerId]?.filter(client => client.id !== clientId);
     });
 }
 
-// Todo: Add streamerId here when connecting, chuck client under streamer's accountId
 app.get('/events/:streamerId', eventsHandler);
 
+// Voting
 // Todo: function for votes, sendToAll doesnt work
 async function addVote(request, respsonse, next) {
     /*
     exampleBody = {
+        streamerId: 12345,
         heroId: 43
     }
     */
     const newVote = request.body;
     voteHero[newVote[streamerId]][newVote.heroId] += 1;
     respsonse.json(voteHero[newVote[streamerId]]);
-    return sendEventsToAll(voteHero[newVote[streamerId]]);
+    const voteEventInfo = {
+        type: 'voteHero',
+        data: voteHero[newVote[streamerId]]
+    }
+    return sendEventsToAll(voteEventInfo, streamerId);
 }
 
 async function initVote(request, respsonse, next) {
     /*
     exampleBody = {
-        heroId: 43
+        streamerId: 12345
     }
     */
-    const streamerId = request.body;
+    const { streamerId } = request.body;
     voteHero[streamerId] = INIT_VOTE_HERO;
     respsonse.json(voteHero[streamerId]);
-    return sendEventsToAll(voteHero[streamerId]);
+    const voteEventInfo = {
+        type: 'voteHero',
+        data: voteHero[streamerId]
+    }
+    console.log(voteHero)
+    return sendEventsToAll(voteEventInfo, streamerId);
 }
 
-app.post('/viewer-vote-hero', addVote);
-
-app.post('/init-vote-hero', initVote);
+app.post('/vote/hero', addVote)
+app.post('/initvote/hero', initVote)
