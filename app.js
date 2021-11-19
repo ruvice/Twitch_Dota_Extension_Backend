@@ -312,6 +312,7 @@ function getVote(request, response, next){
     const streamerId = request.params.streamerId
     const data = `data: ${JSON.stringify(voteHero[streamerId])}`
     response.write(data);
+    response.end()
 }
 app.post('/vote/hero', addVote)
 app.post('/initvote/hero', initVote)
