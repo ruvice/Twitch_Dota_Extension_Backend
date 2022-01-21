@@ -15,13 +15,18 @@ app.use(bodyParser.urlencoded({extended: false}));
 
 const PORT = 3000;
 
-let viewerClients = {};
-let gsiClients = [];
+let viewerClients = {}; // Identifies viewers
+/* viewerClients = {
+    streamerId: [viewerIp1, viewerIp2...]
+}
+*/
+let gsiClients = []; // Identifies streamers using Dota 2 GSI
 let voteHero = {}
 
-var eventEmitter    = require('events').EventEmitter;
+var eventEmitter = require('events').EventEmitter;
 var events = new eventEmitter();
 
+// GSI Client Code
 function gsi_client (ip, auth) {
     this.ip = ip;
     this.auth = auth;
@@ -102,6 +107,7 @@ function New_data(req, res) {
     res.end();
 }
 
+// Not sure how critical this is, not used atm
 function Check_auth(tokens) {
     return function(req, res, next) {
         if (tokens) {
@@ -122,7 +128,6 @@ function Check_auth(tokens) {
 }
 
 function sendEventsToAll(newEvent, streamerId) {
-    console.log(streamerId)
     viewerClients[streamerId]?.forEach(client => client.response.write(`data: ${JSON.stringify(newEvent)}\n\n`))
     // viewerClients.forEach(client => client.response.write(`data: ${JSON.stringify(newEvent)}\n\n`))
 }
@@ -137,9 +142,10 @@ app.post('/',
     New_data);
 
 app.listen(process.env.PORT || PORT, () => {
-  console.log(`Facts Events service listening at https://twitch-dota-extension-backend.herokuapp.com/${PORT}`)
+  console.log(`Events service listening at https://twitch-dota-extension-backend.herokuapp.com/${PORT}`)
 })
 
+// Gets streamerId, stupid steam formatting
 function getSteamId32(steamid){
     const clientSteamIdBin = (steamid).toString(2)
     const clientSteamIdBinLast32 = clientSteamIdBin.slice(-32)
@@ -150,6 +156,7 @@ function getSteamId32(steamid){
     return clientSteamId32
 }
 
+// GSI event
 events.on('newclient', function(client) {
     console.log("New client connection, IP address: " + client.ip);
     if (client.auth && client.auth.token) {
@@ -211,7 +218,7 @@ events.on('newclient', function(client) {
 
 
 // ...
-
+// When new viewer connects
 function eventsHandler(request, response, next) {
     const headers = {
     'Content-Type': 'text/event-stream',
@@ -238,18 +245,20 @@ function eventsHandler(request, response, next) {
     } else {
         viewerClients[streamerId] = [newClient];
     }
+    console.log(viewerClients);
 
     request.on('close', () => {
-    console.log(`${clientId} Connection closed`);
-    viewerClients[streamerId] = viewerClients[streamerId]?.filter(client => client.id !== clientId);
+        console.log(`${clientId} Connection closed`);
+        viewerClients[streamerId] = viewerClients[streamerId]?.filter(client => client.id !== clientId);
     });
 }
 
 app.get('/events/:streamerId', eventsHandler);
 
+
 // Voting
 // Todo: function for votes, sendToAll doesnt work
-async function addVote(request, respsonse, next) {
+function addVote(request, respsonse, next) {
     /*
     exampleBody = {
         streamerId: 12345,
@@ -266,7 +275,7 @@ async function addVote(request, respsonse, next) {
     return sendEventsToAll(voteEventInfo, newVote.streamerId);
 }
 
-async function initVote(request, respsonse, next) {
+function initVote(request, respsonse, next) {
     /*
     exampleBody = {
         streamerId: 12345
@@ -289,7 +298,7 @@ async function initVote(request, respsonse, next) {
     return sendEventsToAll(voteEventInfo, streamerId);
 }
 
-async function stopVote(request, respsonse, next) {
+function stopVote(request, respsonse, next) {
     /*
     exampleBody = {
         streamerId: 12345
