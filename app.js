@@ -9,7 +9,7 @@ const createHttpLink = require("apollo-link-http").createHttpLink;
 const setContext = require("apollo-link-context").setContext;
 const InMemoryCache = require("apollo-cache-inmemory").InMemoryCache;
 
-const STRATZ_API_TOKEN = require('./stratzAuth');
+// const STRATZ_API_TOKEN = require('./stratzAuth');
 const queries = require('./queries');
 
 const httpLink = createHttpLink({
@@ -19,7 +19,7 @@ const httpLink = createHttpLink({
 
 const authLink = setContext((_, { headers }) => {
   // get the authentication token from local storage if it exists
-  const token = STRATZ_API_TOKEN
+  const token = process.env.STRATZ_API_TOKEN
   // return the headers to the context so httpLink can read them
   return {
     headers: {
