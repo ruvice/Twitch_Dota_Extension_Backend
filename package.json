@@ -4,9 +4,17 @@
   "description": "Twitch Extension for Dota 2",
   "main": "app.js",
   "dependencies": {
+    "apollo-cache-inmemory": "^1.6.6",
+    "apollo-client": "^2.6.10",
+    "apollo-link-http": "^1.5.17",
     "cors": "^2.8.5",
     "dota2-gsi": "^1.0.2",
-    "express": "^4.17.1"
+    "express": "^4.17.2",
+    "graphql": "^16.2.0",
+    "graphql-tag": "^2.12.6",
+    "i": "^0.3.7",
+    "node-fetch": "^3.2.0",
+    "npm": "^8.3.2"
   },
   "devDependencies": {},
   "scripts": {

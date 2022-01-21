@@ -8,11 +8,11 @@ const cors = require('cors');
 const { INIT_VOTE_HERO } = require('./helper')
 
 const app = express();
+const apollo = require('./apollo');
 
 app.use(cors());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended: false}));
-
 const PORT = 3000;
 
 let viewerClients = {}; // Identifies viewers
@@ -245,7 +245,6 @@ function eventsHandler(request, response, next) {
     } else {
         viewerClients[streamerId] = [newClient];
     }
-    console.log(viewerClients);
 
     request.on('close', () => {
         console.log(`${clientId} Connection closed`);
