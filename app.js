@@ -1,21 +1,49 @@
 // Potential problems: multiple streamers, might send data from all streamers to all viewers
 // Possible fix: tag viewer clients to unique streamerID, cycle through only that streamer when sending to all
 // MatchID might work better
+// const gql = require("graphql-tag");
+const ApolloClient = require("apollo-client").ApolloClient;
+// const fetch = require('node-fetch');
+const fetch = require("node-fetch");
+const createHttpLink = require("apollo-link-http").createHttpLink;
+const setContext = require("apollo-link-context").setContext;
+const InMemoryCache = require("apollo-cache-inmemory").InMemoryCache;
+
+const STRATZ_API_TOKEN = require('./stratzAuth');
+const queries = require('./queries');
+
+const httpLink = createHttpLink({
+  uri: 'https://api.stratz.com/graphql',
+  fetch: fetch
+});
+
+const authLink = setContext((_, { headers }) => {
+  // get the authentication token from local storage if it exists
+  const token = STRATZ_API_TOKEN
+  // return the headers to the context so httpLink can read them
+  return {
+    headers: {
+      ...headers,
+      authorization: token ? `Bearer ${token}` : "",
+    }
+  }
+});
+
+const apolloClient = new ApolloClient({
+  link: authLink.concat(httpLink),
+  cache: new InMemoryCache()
+});
 
 const express = require('express');
 const bodyParser = require('body-parser');
 const cors = require('cors');
-const { INIT_VOTE_HERO } = require('./helper')
-const apollo = require("./apollo");
-const query = require("./apollo");
+const { INIT_VOTE_HERO, getSteamId32 } = require('./helper')
+const handleEventString = require('./queryHelper')
 
 const app = express();
-const queryApp = express();
 app.use(cors());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended: false}));
-queryApp.use(apollo);
-queryApp.use(express.json)
 const PORT = 3000;
 
 let viewerClients = {}; // Identifies viewers
@@ -148,19 +176,9 @@ app.listen(process.env.PORT || PORT, () => {
   console.log(`Events service listening at https://twitch-dota-extension-backend.herokuapp.com/${PORT}`)
 })
 
-// Gets streamerId, stupid steam formatting
-function getSteamId32(steamid){
-    const clientSteamIdBin = (steamid).toString(2)
-    const clientSteamIdBinLast32 = clientSteamIdBin.slice(-32)
-    const Y = BigInt(clientSteamIdBinLast32.slice(-1))
-    const V = BigInt(76561197960265728) // Default identifier https://developer.valvesoftware.com/wiki/SteamID
-    const Ztest = parseInt(clientSteamIdBinLast32.slice(0, 31), 2) // Account ID
-    const clientSteamId32 = Ztest*2 + Number(Y) // Forumla from docs
-    return clientSteamId32
-}
 
 // GSI event
-events.on('newclient', function(client) {
+events.on('newclient', async function(client) {
     console.log("New client connection, IP address: " + client.ip);
     if (client.auth && client.auth.token) {
         console.log("Auth token: " + client.auth.token);
@@ -192,7 +210,18 @@ events.on('newclient', function(client) {
             type: 'levelup',
             data: level,
         }
-        queryApp.post()
+        // This works
+        // let test = null
+        // apolloClient.query({query: queries.test})
+        //     .then((result) => {
+        //         test = result.data.constants.heroes
+        //         console.log(result.data.constants.heroes)
+        //     })
+        //     .then(() => {
+        //         console.log('test')
+        //         console.log(test)
+        //     })
+        
         const clientSteamId32 = getSteamId32(BigInt(client.gamestate.player.steamid))
         return sendEventsToAll(eventInfo, clientSteamId32);
     });
@@ -216,6 +245,17 @@ events.on('newclient', function(client) {
             data: id,
         }
         const clientSteamId32 = getSteamId32(BigInt(client.gamestate.player.steamid))
+        const variables = {
+            heroId: id,
+            steamAccountId: clientSteamId32
+        }
+        let returnedResult = null
+        apolloClient.query({query: queries.pick, variables})
+            .then((result) => {
+                returnedResult = result.data.player.heroPerformance
+                const tooltipString = handleEventString(returnedResult, queries.pick)
+                console.log(tooltipString)
+            })
         return sendEventsToAll(eventInfo, clientSteamId32);
     })
 });

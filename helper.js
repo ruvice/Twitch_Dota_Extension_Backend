@@ -123,6 +123,18 @@ const INIT_VOTE_HERO = {
   136 : 0,
 }
 
+
+// Gets streamerId, stupid steam formatting
+function getSteamId32(steamid){
+  const clientSteamIdBin = (steamid).toString(2)
+  const clientSteamIdBinLast32 = clientSteamIdBin.slice(-32)
+  const Y = BigInt(clientSteamIdBinLast32.slice(-1))
+  const V = BigInt(76561197960265728) // Default identifier https://developer.valvesoftware.com/wiki/SteamID
+  const Ztest = parseInt(clientSteamIdBinLast32.slice(0, 31), 2) // Account ID
+  const clientSteamId32 = Ztest*2 + Number(Y) // Forumla from docs
+  return clientSteamId32
+}
+
 module.exports = {
-  INIT_VOTE_HERO
+  INIT_VOTE_HERO, getSteamId32,
 }
