@@ -1,5 +1,6 @@
 // const gql = require("graphql-tag");
 const ApolloClient = require("apollo-client").ApolloClient;
+// const fetch = require('node-fetch');
 const fetch = require("node-fetch");
 const createHttpLink = require("apollo-link-http").createHttpLink;
 const setContext = require("apollo-link-context").setContext;
@@ -36,7 +37,7 @@ const query = async (res) => {
   //   return;
   // }
 
-  // const query = queries.test;
+  const query = queries.test;
   // let variables = undefined;
   // if (req.body.variables) {
   //   variables = JSON.parse(decodeURIComponent(req.body.variables));
@@ -45,7 +46,7 @@ const query = async (res) => {
   try {
     const result = await client.query({
       query,
-      variables
+      // variables
     });
     res.json(result);
   } catch (err) {
@@ -56,12 +57,12 @@ const query = async (res) => {
 
 const apollo = async (req, res, next) => {
   switch (req.method) {
-    case "GET":
     default:
       await query(res);
   }
-
-  next();
+  return res;
+  // next();
 };
 
 module.exports = apollo;
+module.exports = query;

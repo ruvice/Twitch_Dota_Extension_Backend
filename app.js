@@ -6,13 +6,16 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const cors = require('cors');
 const { INIT_VOTE_HERO } = require('./helper')
+const apollo = require("./apollo");
+const query = require("./apollo");
 
 const app = express();
-const apollo = require('./apollo');
-
+const queryApp = express();
 app.use(cors());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended: false}));
+queryApp.use(apollo);
+queryApp.use(express.json)
 const PORT = 3000;
 
 let viewerClients = {}; // Identifies viewers
@@ -189,6 +192,7 @@ events.on('newclient', function(client) {
             type: 'levelup',
             data: level,
         }
+        queryApp.post()
         const clientSteamId32 = getSteamId32(BigInt(client.gamestate.player.steamid))
         return sendEventsToAll(eventInfo, clientSteamId32);
     });
