@@ -246,6 +246,9 @@ events.on('newclient', async function(client) {
                     'targets': ['broadcast'],
                     headers: {
                         'Authorization': `Bearer ${jwtToken}`,
+                        'Client-Id': `${process.env.TWITCH_CLIENT_ID}`,
+                        'content_type': 'application/json',
+
                     }
                 })
                 .then(res => {
