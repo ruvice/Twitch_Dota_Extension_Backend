@@ -1,15 +1,15 @@
-// Potential problems: multiple streamers, might send data from all streamers to all viewers
-// Possible fix: tag viewer clients to unique streamerID, cycle through only that streamer when sending to all
-// MatchID might work better
-// const gql = require("graphql-tag");
+/*
+    Todo:
+    1. Implement PubSub Message
+    2. Remove unnecessary code if 1 works
+    3. Consider looking into ways streamers can customise messages
+*/
 const ApolloClient = require("apollo-client").ApolloClient;
-// const fetch = require('node-fetch');
 const fetch = require("node-fetch");
 const createHttpLink = require("apollo-link-http").createHttpLink;
 const setContext = require("apollo-link-context").setContext;
 const InMemoryCache = require("apollo-cache-inmemory").InMemoryCache;
 
-// const STRATZ_API_TOKEN = require('./stratzAuth');
 const queries = require('./queries');
 
 const httpLink = createHttpLink({
@@ -38,7 +38,7 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const cors = require('cors');
 const { INIT_VOTE_HERO, getSteamId32 } = require('./helper')
-const handleEventString = require('./queryHelper')
+const { handleEventString, getRandom } = require('./queryHelper')
 
 const app = express();
 app.use(cors());
@@ -201,28 +201,39 @@ events.on('newclient', async function(client) {
             type: 'outcome',
             data: isVictory,
         }
+        const tooltipString = handleEventString.outcome[0](isVictory)
+        console.log(tooltipString)
         const clientSteamId32 = getSteamId32(BigInt(client.gamestate.player.steamid))
         return sendEventsToAll(eventInfo, clientSteamId32);
     });
     client.on('hero:level', function(level) {
+        const clientSteamId32 = getSteamId32(BigInt(client.gamestate.player.steamid))
         console.log("Now level " + level);
         const eventInfo = {
             type: 'levelup',
             data: level,
         }
-        // This works
-        // let test = null
-        // apolloClient.query({query: queries.test})
-        //     .then((result) => {
-        //         test = result.data.constants.heroes
-        //         console.log(result.data.constants.heroes)
-        //     })
-        //     .then(() => {
-        //         console.log('test')
-        //         console.log(test)
-        //     })
-        
-        const clientSteamId32 = getSteamId32(BigInt(client.gamestate.player.steamid))
+        const variables = {
+            steamAccountId: clientSteamId32
+        }
+        if (level === 1) {
+            const selectedQuery = getRandom(queries.begin.length-1)
+            apolloClient.query({query: queries.begin[selectedQuery], variables})
+            .then((result) => {
+                const tooltipString = handleEventString.begin[selectedQuery](result)
+                console.log(tooltipString)
+            })
+        } else {
+            const selectedQuery = getRandom(queries.level.length-1)
+            console.log(queries.level[selectedQuery])
+            apolloClient.query({query: queries.level[selectedQuery], variables})
+            .then((result) => {
+                // const tooltipString = handleEventString.level[selectedQuery](result, level)
+                // console.log(tooltipString)
+                console.log(result)
+            })
+            .catch((result) => console.log(result))
+        }
         return sendEventsToAll(eventInfo, clientSteamId32);
     });
     client.on('player:kills', function(kills) {
@@ -249,13 +260,13 @@ events.on('newclient', async function(client) {
             heroId: id,
             steamAccountId: clientSteamId32
         }
-        let returnedResult = null
-        apolloClient.query({query: queries.pick, variables})
+        const selectedQuery = getRandom(queries.pick.length-1)
+        apolloClient.query({query: queries.pick[selectedQuery], variables})
             .then((result) => {
-                returnedResult = result.data.player.heroPerformance
-                const tooltipString = handleEventString(returnedResult, queries.pick)
+                const tooltipString = handleEventString.pick[selectedQuery](result, id)
                 console.log(tooltipString)
             })
+            .catch((rejected) => console.log(rejected))
         return sendEventsToAll(eventInfo, clientSteamId32);
     })
 });
