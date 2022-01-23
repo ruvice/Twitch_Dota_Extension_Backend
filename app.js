@@ -9,6 +9,8 @@ const fetch = require("node-fetch");
 const createHttpLink = require("apollo-link-http").createHttpLink;
 const setContext = require("apollo-link-context").setContext;
 const InMemoryCache = require("apollo-cache-inmemory").InMemoryCache;
+var jwt = require('jsonwebtoken');
+const axios = require('axios')
 
 const queries = require('./queries');
 
@@ -230,7 +232,31 @@ events.on('newclient', async function(client) {
             apolloClient.query({query: queries.level[selectedQuery], variables})
             .then((result) => {
                 const tooltipString = handleEventString.level[selectedQuery](result, level)
-                // app.post('https://api.twitch.tv/extensions/message/',)
+                
+                const jwtToken = jwt.sign({
+                    channelId: streamerIDMapping[clientSteamId32],
+                    pubsub_perms: {
+                        send: ["broadcast"],
+                    },
+                    role: 'external',
+                  }, process.env.TWITCH_SECRET, { expiresIn: '1h' });
+
+
+                axios.post(`https://api.twitch.tv/extensions/message/${streamerIDMapping[clientSteamId32]}`, {
+                    headers: {
+                        authorization: `Bearer ${jwtToken}`
+                    },
+                    channelId: `${streamerIDMapping[clientSteamId32]}`,
+                    message: `${tooltipString}`,
+                    targets: ['broadcast']
+                })
+                .then(res => {
+                    console.log(`statusCode: ${res.status}`)
+                    console.log(res)
+                })
+                .catch(error => {
+                    console.error(error)
+                })
                 console.log(tooltipString)
                 console.log(result)
             })
@@ -312,7 +338,11 @@ function eventsHandler(request, response, next) {
 app.get('/events/:streamerId', eventsHandler);
 
 function initHandler(req, res) {
-    console.log(req)
+    const channelId = req.body.channelId
+    const streamerId = req.params.streamerId
+    if (!(streamerId in streamerIDMapping)) {
+        streamerIDMapping[streamerId] = channelId
+    }
 }
 app.post('/init/:streamerId', initHandler);
 
