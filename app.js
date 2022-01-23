@@ -241,13 +241,13 @@ events.on('newclient', async function(client) {
                   }, process.env.TWITCH_SECRET, { expiresIn: '1h' });
 
                 axios.post(`https://api.twitch.tv/extensions/message/${streamerIDMapping[clientSteamId32]}`, {
-                    'channelId': `${streamerIDMapping[clientSteamId32]}`,
-                    'message': `${tooltipString}`,
+                    'channel_id': `${streamerIDMapping[clientSteamId32]}`,
+                    'message': {tooltipString: `${tooltipString}`},
                     'targets': ['broadcast'],
-                    headers: {
+                    'headers': {
                         'Authorization': `Bearer ${jwtToken}`,
                         'Client-Id': `${process.env.TWITCH_CLIENT_ID}`,
-                        'content_type': 'application/json',
+                        'Content_Type': 'application/json',
 
                     }
                 })
