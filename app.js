@@ -248,7 +248,7 @@ events.on('newclient', async function(client) {
                     {
                         headers: {
                             'Authorization': `Bearer ${jwtToken}`,
-                            'Client-Id': `${Buffer.from(process.env.TWITCH_CLIENT_ID, 'base64')}`,
+                            'client-id': `${Buffer.from(process.env.TWITCH_CLIENT_ID, 'base64')}`,
                             'Content_Type': 'application/json',
                         }
                     }
