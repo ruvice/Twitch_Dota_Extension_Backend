@@ -244,13 +244,15 @@ events.on('newclient', async function(client) {
                     'channel_id': `${streamerIDMapping[clientSteamId32]}`,
                     'message': {tooltipString: `${tooltipString}`},
                     'targets': ['broadcast'],
-                    'headers': {
-                        'Authorization': `Bearer ${jwtToken}`,
-                        'Client-ID': `${process.env.TWITCH_CLIENT_ID}`,
-                        'Content_Type': 'application/json',
-
+                    },
+                    {
+                        headers: {
+                            'Authorization': `Bearer ${jwtToken}`,
+                            'Client-ID': `${process.env.TWITCH_CLIENT_ID}`,
+                            'Content_Type': 'application/json',
+                        }
                     }
-                })
+                )
                 .then(res => {
                     console.log(`statusCode: ${res.status}`)
                     console.log(res)
