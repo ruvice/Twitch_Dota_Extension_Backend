@@ -233,7 +233,7 @@ events.on('newclient', async function(client) {
                 console.log(result)
                 const tooltipString = handleEventString.level[selectedQuery](result, level) 
                 const jwtToken = jwt.sign({
-                    channelId: streamerIDMapping[clientSteamId32],
+                    channel_id: streamerIDMapping[clientSteamId32],
                     pubsub_perms: {
                         send: ["broadcast"],
                     },
