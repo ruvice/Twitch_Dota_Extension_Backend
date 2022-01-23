@@ -244,6 +244,7 @@ events.on('newclient', async function(client) {
                     'channel_id': `${streamerIDMapping[clientSteamId32]}`,
                     'message': {tooltipString: `${tooltipString}`},
                     'targets': ['broadcast'],
+                    'content_type': 'application/json'
                     },
                     {
                         headers: {
