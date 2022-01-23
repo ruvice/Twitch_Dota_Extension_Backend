@@ -40,9 +40,9 @@ const PLAYER_LEVEL_QUERY = gql`
 
 const PLAYER_BEGIN_QUERY_STREAK = gql`
   query getPlayerStreakGeneral($steamAccountId: Long!) {
-    player(steamAccountId: 123702490) {
+    player(steamAccountId: $steamAccountId) {
       matches(request: {take: 25}) {
-        players(steamAccountId: 123702490) {
+        players(steamAccountId: $steamAccountId) {
           isVictory
         }
       }

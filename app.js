@@ -53,6 +53,7 @@ let viewerClients = {}; // Identifies viewers
 */
 let gsiClients = []; // Identifies streamers using Dota 2 GSI
 let voteHero = {}
+let streamerIDMapping = {}
 
 var eventEmitter = require('events').EventEmitter;
 var events = new eventEmitter();
@@ -228,8 +229,9 @@ events.on('newclient', async function(client) {
             console.log(queries.level[selectedQuery])
             apolloClient.query({query: queries.level[selectedQuery], variables})
             .then((result) => {
-                // const tooltipString = handleEventString.level[selectedQuery](result, level)
-                // console.log(tooltipString)
+                const tooltipString = handleEventString.level[selectedQuery](result, level)
+                // app.post('https://api.twitch.tv/extensions/message/',)
+                console.log(tooltipString)
                 console.log(result)
             })
             .catch((result) => console.log(result))
@@ -308,6 +310,11 @@ function eventsHandler(request, response, next) {
 }
 
 app.get('/events/:streamerId', eventsHandler);
+
+function initHandler(req, res) {
+    console.log(req)
+}
+app.post('/init/:streamerId', initHandler);
 
 
 // Voting
