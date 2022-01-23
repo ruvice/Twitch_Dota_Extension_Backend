@@ -242,7 +242,7 @@ events.on('newclient', async function(client) {
 
                 axios.post(`https://api.twitch.tv/extensions/message/${streamerIDMapping[clientSteamId32]}`, body={
                     'channel_id': `${streamerIDMapping[clientSteamId32]}`,
-                    'message': {tooltipString: `${tooltipString}`},
+                    'message': JSON.stringify({tooltipString: `${tooltipString}`}),
                     'targets': ['broadcast'],
                     'content_type': 'application/json'
                     },
