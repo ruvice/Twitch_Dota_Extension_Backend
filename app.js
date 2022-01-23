@@ -240,26 +240,40 @@ events.on('newclient', async function(client) {
                     role: 'external',
                   }, process.env.TWITCH_SECRET, { expiresIn: '1h' });
 
-                axios.post(`https://api.twitch.tv/extensions/message/${streamerIDMapping[clientSteamId32]}`, data={
-                    'channel_id': `${streamerIDMapping[clientSteamId32]}`,
-                    'message': {tooltipString: `${tooltipString}`},
-                    'targets': ['broadcast'],
+                // axios.post(`https://api.twitch.tv/extensions/message/${streamerIDMapping[clientSteamId32]}`, data={
+                //     'channel_id': `${streamerIDMapping[clientSteamId32]}`,
+                //     'message': {tooltipString: `${tooltipString}`},
+                //     'targets': ['broadcast'],
+                //     },
+                //     {
+                //         headers: {
+                //             'Authorization': `Bearer ${jwtToken}`,
+                //             'Client-ID': `${process.env.TWITCH_CLIENT_ID}`,
+                //             'Content_Type': 'application/json',
+                //         }
+                //     }
+                // )
+                // .then(res => {
+                //     console.log(`statusCode: ${res.status}`)
+                //     console.log(res)
+                // })
+                // .catch(error => {
+                //     console.error(error)
+                // })
+                axios({
+                    method: 'post',
+                    url: `https://api.twitch.tv/extensions/message/${streamerIDMapping[clientSteamId32]}`,
+                    headers: {
+                        'Authorization': `Bearer ${jwtToken}`,
+                        'Client-ID': `${process.env.TWITCH_CLIENT_ID}`,
+                        'Content_Type': 'application/json',
                     },
-                    {
-                        headers: {
-                            'Authorization': `Bearer ${jwtToken}`,
-                            'Client-ID': `${process.env.TWITCH_CLIENT_ID}`,
-                            'Content_Type': 'application/json',
-                        }
+                    data: {
+                        channel_id: `${streamerIDMapping[clientSteamId32]}`,
+                        message: {tooltipString: `${tooltipString}`},
+                        targets: ['broadcast'],
                     }
-                )
-                .then(res => {
-                    console.log(`statusCode: ${res.status}`)
-                    console.log(res)
-                })
-                .catch(error => {
-                    console.error(error)
-                })
+                });
                 console.log(tooltipString)
                 console.log(result)
             })
