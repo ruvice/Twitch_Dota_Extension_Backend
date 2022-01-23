@@ -240,11 +240,10 @@ events.on('newclient', async function(client) {
                     role: 'external',
                   }, process.env.TWITCH_SECRET, { expiresIn: '1h' });
 
-                axios.post(`https://api.twitch.tv/extensions/message/${streamerIDMapping[clientSteamId32]}`, body={
-                    'channel_id': `${streamerIDMapping[clientSteamId32]}`,
+                axios.post(`https://api.twitch.tv/helix/extensions/pubsub`, body={
+                    'broadcaster_id': `${streamerIDMapping[clientSteamId32]}`,
                     'message': JSON.stringify({tooltipString: `${tooltipString}`}),
-                    'targets': ['broadcast'],
-                    'content_type': 'application/json'
+                    'target': ['broadcast'],
                     },
                     {
                         headers: {
