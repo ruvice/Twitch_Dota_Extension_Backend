@@ -30,7 +30,6 @@ const PLAYER_LEVEL_QUERY = gql`
         players(steamAccountId: $steamAccountId) {
           stats {
             level
-            
           }
         }
       }

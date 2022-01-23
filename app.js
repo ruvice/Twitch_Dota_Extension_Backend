@@ -228,11 +228,10 @@ events.on('newclient', async function(client) {
             })
         } else {
             const selectedQuery = getRandom(queries.level.length-1)
-            console.log(queries.level[selectedQuery])
             apolloClient.query({query: queries.level[selectedQuery], variables})
             .then((result) => {
-                const tooltipString = handleEventString.level[selectedQuery](result, level)
-                
+                console.log(result)
+                const tooltipString = handleEventString.level[selectedQuery](result, level) 
                 const jwtToken = jwt.sign({
                     channelId: streamerIDMapping[clientSteamId32],
                     pubsub_perms: {

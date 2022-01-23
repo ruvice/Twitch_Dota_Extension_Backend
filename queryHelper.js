@@ -32,7 +32,7 @@ const getPickStreakString = (returnedResult) => {
 }
 
 const getLevelString = (returnedResult, level) => {
-  const parsedResult = returnedResult.data.player.matches.players.stats.level
+  const parsedResult = returnedResult.data.player.matches.players[0].stats.level
   const timestampPrev = parsedResult[level - 1]
   const minTimestamp = Math.floor(timestampPrev/60)
   const secTimestamp = timestampPrev % 60 
