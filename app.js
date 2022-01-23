@@ -238,7 +238,7 @@ events.on('newclient', async function(client) {
                         send: ["broadcast"],
                     },
                     role: 'external',
-                  }, process.env.TWITCH_SECRET, { expiresIn: '1h' });
+                  }, Buffer.from(process.env.TWITCH_SECRET, 'base64'), { expiresIn: '1h' });
 
                 axios.post(`https://api.twitch.tv/helix/extensions/pubsub`, body={
                     'broadcaster_id': `${streamerIDMapping[clientSteamId32]}`,
@@ -248,7 +248,7 @@ events.on('newclient', async function(client) {
                     {
                         headers: {
                             'Authorization': `Bearer ${jwtToken}`,
-                            'Client_Id': `${Buffer.from(process.env.TWITCH_CLIENT_ID, 'base64')}`,
+                            'Client-Id': `${process.env.TWITCH_CLIENT_ID}`,
                             'Content_Type': 'application/json',
                         }
                     }
