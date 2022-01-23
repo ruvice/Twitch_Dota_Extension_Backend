@@ -241,11 +241,9 @@ events.on('newclient', async function(client) {
                   }, process.env.TWITCH_SECRET, { expiresIn: '1h' });
 
                 axios.post(`https://api.twitch.tv/extensions/message/${streamerIDMapping[clientSteamId32]}`, {
-                    data: {
-                        'channelId': `${streamerIDMapping[clientSteamId32]}`,
-                        'message': `${tooltipString}`,
-                        'targets': ['broadcast'],
-                    },
+                    'channelId': `${streamerIDMapping[clientSteamId32]}`,
+                    'message': `${tooltipString}`,
+                    'targets': ['broadcast'],
                     headers: {
                         'Authorization': `Bearer ${jwtToken}`,
                     }
@@ -340,6 +338,7 @@ app.get('/events/:streamerId', eventsHandler);
 function initHandler(req, res) {
     const channelId = req.body.channelId
     const streamerId = req.params.streamerId
+    console.log(channelId)
     if (!(streamerId in streamerIDMapping)) {
         streamerIDMapping[streamerId] = channelId
     }
