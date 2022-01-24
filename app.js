@@ -11,8 +11,8 @@ const setContext = require("apollo-link-context").setContext;
 const InMemoryCache = require("apollo-cache-inmemory").InMemoryCache;
 var jwt = require('jsonwebtoken');
 const axios = require('axios')
-
 const queries = require('./queries');
+require('dotenv').config();
 
 const httpLink = createHttpLink({
   uri: 'https://api.stratz.com/graphql',

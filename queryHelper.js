@@ -42,9 +42,9 @@ const getLevelString = (returnedResult, level) => {
 
 const getBeginString = (returnedResult) => {
   const parsedResult = returnedResult.data.player.matches
-  const winStreak = 0
-  for (match in parsedResult) {
-    if (match.players[0].isVictory) {
+  let winStreak = 0
+  for (i in parsedResult) {
+    if (parsedResult[i].players[0].isVictory) {
       winStreak += 1
     } else {
       break
@@ -85,6 +85,7 @@ const getBeginString = (returnedResult) => {
         break
     }
   }
+  return string
 }
 
 // Outcome
@@ -118,6 +119,7 @@ const getOutcomeString = (isVictory) => {
         break
     }
   }
+  return string
 }
 
 // This should match order of queries.js
