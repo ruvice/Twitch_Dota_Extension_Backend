@@ -1,8 +1,8 @@
 /*
     Todo:
-    1. Implement PubSub Message
-    2. Remove unnecessary code if 1 works
-    3. Consider looking into ways streamers can customise messages
+    1. Consider looking into ways streamers can customise messages
+    2. Refactor code, look into moving axios into another separate file?
+    3. Add for query and stats for kills
 */
 const ApolloClient = require("apollo-client").ApolloClient;
 const fetch = require("node-fetch");
@@ -163,7 +163,6 @@ function Check_auth(tokens) {
 
 function sendEventsToAll(newEvent, streamerId) {
     viewerClients[streamerId]?.forEach(client => client.response.write(`data: ${JSON.stringify(newEvent)}\n\n`))
-    // viewerClients.forEach(client => client.response.write(`data: ${JSON.stringify(newEvent)}\n\n`))
 }
 
 
@@ -205,9 +204,28 @@ events.on('newclient', async function(client) {
             data: isVictory,
         }
         const tooltipString = handleEventString.outcome[0](isVictory)
-        console.log(tooltipString)
         const clientSteamId32 = getSteamId32(BigInt(client.gamestate.player.steamid))
-        return sendEventsToAll(eventInfo, clientSteamId32);
+        axios.post(`https://api.twitch.tv/helix/extensions/pubsub`, body={
+                'broadcaster_id': `${streamerIDMapping[clientSteamId32]}`,
+                'message': JSON.stringify({tooltipString: `${tooltipString}`}),
+                'target': ['broadcast'],
+                },
+                {
+                    headers: {
+                        'Authorization': `Bearer ${jwtToken}`,
+                        'Client-Id': `${process.env.TWITCH_CLIENT_ID}`,
+                        'Content_Type': 'application/json',
+                    }
+                }
+            )
+            .then(res => {
+                console.log(`statusCode: ${res.status}`)
+                console.log(res)
+            })
+            .catch(error => {
+                console.error(error)
+            })
+        // return sendEventsToAll(eventInfo, clientSteamId32);
     });
     client.on('hero:level', function(level) {
         const clientSteamId32 = getSteamId32(BigInt(client.gamestate.player.steamid))
@@ -260,26 +278,10 @@ events.on('newclient', async function(client) {
                 .catch(error => {
                     console.error(error)
                 })
-                // axios({
-                //     method: 'post',
-                //     url: `https://api.twitch.tv/extensions/message/${streamerIDMapping[clientSteamId32]}`,
-                //     headers: {
-                //         'Authorization': `Bearer ${jwtToken}`,
-                //         'Client-ID': `${process.env.TWITCH_CLIENT_ID}`,
-                //         'Content_Type': 'application/json',
-                //     },
-                //     data: {
-                //         channel_id: `${streamerIDMapping[clientSteamId32]}`,
-                //         message: {tooltipString: `${tooltipString}`},
-                //         targets: ['broadcast'],
-                //     }
-                // });
-                console.log(tooltipString)
-                console.log(result)
             })
             .catch((result) => console.log(result))
         }
-        return sendEventsToAll(eventInfo, clientSteamId32);
+        // return sendEventsToAll(eventInfo, clientSteamId32);
     });
     client.on('player:kills', function(kills) {
         console.log(`Kills: ${kills}`)
@@ -292,7 +294,7 @@ events.on('newclient', async function(client) {
             },
         }
         const clientSteamId32 = getSteamId32(BigInt(client.gamestate.player.steamid))
-        return sendEventsToAll(eventInfo, clientSteamId32);
+        // return sendEventsToAll(eventInfo, clientSteamId32);
     });
     client.on('hero:id', function(id){
         console.log("Picked " + id);
@@ -309,10 +311,29 @@ events.on('newclient', async function(client) {
         apolloClient.query({query: queries.pick[selectedQuery], variables})
             .then((result) => {
                 const tooltipString = handleEventString.pick[selectedQuery](result, id)
-                console.log(tooltipString)
+                axios.post(`https://api.twitch.tv/helix/extensions/pubsub`, body={
+                    'broadcaster_id': `${streamerIDMapping[clientSteamId32]}`,
+                    'message': JSON.stringify({tooltipString: `${tooltipString}`}),
+                    'target': ['broadcast'],
+                    },
+                    {
+                        headers: {
+                            'Authorization': `Bearer ${jwtToken}`,
+                            'Client-Id': `${process.env.TWITCH_CLIENT_ID}`,
+                            'Content_Type': 'application/json',
+                        }
+                    }
+                )
+                .then(res => {
+                    console.log(`statusCode: ${res.status}`)
+                    console.log(res)
+                })
+                .catch(error => {
+                    console.error(error)
+                })
             })
             .catch((rejected) => console.log(rejected))
-        return sendEventsToAll(eventInfo, clientSteamId32);
+        // return sendEventsToAll(eventInfo, clientSteamId32);
     })
 });
 
