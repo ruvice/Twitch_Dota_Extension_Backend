@@ -205,6 +205,13 @@ events.on('newclient', async function(client) {
         }
         const tooltipString = handleEventString.outcome[0](isVictory)
         const clientSteamId32 = getSteamId32(BigInt(client.gamestate.player.steamid))
+        const jwtToken = jwt.sign({
+            channel_id: streamerIDMapping[clientSteamId32],
+            pubsub_perms: {
+                send: ["broadcast"],
+            },
+            role: 'external',
+          }, Buffer.from(process.env.TWITCH_SECRET, 'base64'), { expiresIn: '1h' });
         axios.post(`https://api.twitch.tv/helix/extensions/pubsub`, body={
                 'broadcaster_id': `${streamerIDMapping[clientSteamId32]}`,
                 'message': JSON.stringify({tooltipString: `${tooltipString}`}),
@@ -311,6 +318,13 @@ events.on('newclient', async function(client) {
         apolloClient.query({query: queries.pick[selectedQuery], variables})
             .then((result) => {
                 const tooltipString = handleEventString.pick[selectedQuery](result, id)
+                const jwtToken = jwt.sign({
+                    channel_id: streamerIDMapping[clientSteamId32],
+                    pubsub_perms: {
+                        send: ["broadcast"],
+                    },
+                    role: 'external',
+                  }, Buffer.from(process.env.TWITCH_SECRET, 'base64'), { expiresIn: '1h' });
                 axios.post(`https://api.twitch.tv/helix/extensions/pubsub`, body={
                     'broadcaster_id': `${streamerIDMapping[clientSteamId32]}`,
                     'message': JSON.stringify({tooltipString: `${tooltipString}`}),
